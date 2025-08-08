@@ -5,73 +5,86 @@ import ListView from "./ListView";
 function App() {
   const [numbers, setNumbers] = useState([]);
 
-  // Load saved list from localStorage on first render
+  // load numbers from localStorage when component mounts
   useEffect(() => {
     const savedNumbers = localStorage.getItem("numbers");
     if (savedNumbers) {
-      setNumbers(JSON.parse(savedNumbers));
+      try {
+        setNumbers(JSON.parse(savedNumbers));
+      } catch (e) {
+        console.error("Failed to parse saved numbers:", e);
+      }
     }
   }, []);
 
-  // Save list to localStorage whenever it changes
+  // save to localStorage whenever numbers array changes
   useEffect(() => {
     localStorage.setItem("numbers", JSON.stringify(numbers));
   }, [numbers]);
 
-  const handleAdd = (num) => {
-    setNumbers((prev) => {
-      if (num > 0 && !prev.includes(num)) {
-        return [...prev, num];
+  const addNumber = (num) => {
+    setNumbers(prevNumbers => {
+      // only add positive numbers that aren't already in the list
+      if (num > 0 && !prevNumbers.includes(num)) {
+        return [...prevNumbers, num];
       }
-      return prev;
+      return prevNumbers;
     });
   };
 
-  const handleReset = () => {
+  const resetList = () => {
     setNumbers([]);
   };
 
-  const handleRemove = (numToRemove) => {
-    setNumbers(numbers.filter((num) => num !== numToRemove));
+  const removeNumber = (numberToRemove) => {
+    setNumbers(prevNumbers => 
+      prevNumbers.filter(num => num !== numberToRemove)
+    );
+  };
+
+  const containerStyle = {
+    backgroundColor: "#e8f0fe",
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    padding: "20px",
+    fontFamily: "Arial, sans-serif"
+  };
+
+  const contentStyle = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "20px",
+    width: "100%",
+    maxWidth: "400px",
+    marginTop: "8px"
+  };
+
+  const titleStyle = {
+    textAlign: "center",
+    marginBottom: "18px"
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#e8f0fe",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        padding: "20px 20px",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <h2 style={{ textAlign: "center", marginBottom: "18px" }}>
+    <div style={containerStyle}>
+      <h2 style={titleStyle}>
         Counter & List App
       </h2>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "20px",
-          width: "100%",
-          maxWidth: "400px",
-          marginTop: "8px",
-        }}
-      >
-        <Counter onAdd={handleAdd} />
+      <div style={contentStyle}>
+        <Counter onAdd={addNumber} />
         <ListView
           items={numbers}
-          onReset={handleReset}
-          onRemove={handleRemove}
+          onReset={resetList}
+          onRemove={removeNumber}
         />
       </div>
     </div>
   );
 }
 export default App;
+
 export default App;
